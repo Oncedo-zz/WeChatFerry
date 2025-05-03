@@ -23,7 +23,7 @@ logging:
 wechat:
   ferry:
     # DLL文件位置
-    dll-path: E:\WeChatFerry\clients\java\wcf-bmc\dll\sdk.dll
+    dll-path: C:\Users\Administrator\Desktop\WeChatBot\Java\dp\WeChatFerry-dp\clients\java\wcf-bmc\dll\sdk.dll
     # socket端口
     socket-port: 10086
     # SDK是否调试模式
@@ -39,7 +39,7 @@ wechat:
     # 需要开启消息处理的群
     open-msg-groups:
       # key:"[群编号]" val:开启的功能号,对应ReceiveMsgChannelEnum枚举中的code
-      "[ALL]": '0,1'
+      "[ALL]": ''
       "[53257911730@chatroom]": '0,2,3'
       "[50501762866@chatroom]": '0,3'
     # 接收消息回调开关
