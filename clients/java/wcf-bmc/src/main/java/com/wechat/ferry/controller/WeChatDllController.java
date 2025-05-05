@@ -14,6 +14,7 @@ import com.wechat.ferry.entity.vo.request.WxPpWcfAddFriendGroupMemberReq;
 import com.wechat.ferry.entity.vo.request.WxPpWcfDatabaseSqlReq;
 import com.wechat.ferry.entity.vo.request.WxPpWcfDatabaseTableReq;
 import com.wechat.ferry.entity.vo.request.WxPpWcfDeleteGroupMemberReq;
+import com.wechat.ferry.entity.vo.request.WxPpWcfDownloadAttachReq;
 import com.wechat.ferry.entity.vo.request.WxPpWcfGroupMemberReq;
 import com.wechat.ferry.entity.vo.request.WxPpWcfInviteGroupMemberReq;
 import com.wechat.ferry.entity.vo.request.WxPpWcfPassFriendApplyReq;
@@ -258,16 +259,52 @@ public class WeChatDllController {
         return TResponse.ok(ResponseCodeEnum.SUCCESS);
     }
 
-    // @ApiOperation(value = "下载图片、视频、文件", notes = "queryMsgTypeList")
-    // @PostMapping(value = "/list/msgType")
-    // public TResponse<Object> queryMsgTypeList() {
-    // return TResponse.ok(ResponseCodeEnum.SUCCESS, list);
-    // }
-    //
-    // @ApiOperation(value = "解密图片", notes = "queryMsgTypeList")
-    // @PostMapping(value = "/list/msgType")
-    // public TResponse<Object> queryMsgTypeList() {
-    // return TResponse.ok(ResponseCodeEnum.SUCCESS, list);
-    // }
+    /**
+     * 下载视频
+     *
+     * @param request 请求入参
+     * @return 下载文件的路径
+     *
+     * @author zm
+     * @date 2025-05-01
+     */
+    @ApiOperation(value = "下载视频", notes = "download_video")
+    @PostMapping(value = "/download/video")
+    public TResponse<String> downloadVideo(@Validated @RequestBody WxPpWcfDownloadAttachReq request) {
+        String path = weChatDllService.downloadVideo(request);
+        return TResponse.ok(ResponseCodeEnum.SUCCESS, path);
+    }
+
+    /**
+     * 下载图片
+     *
+     * @param request 请求入参
+     * @return 下载文件的路径
+     * @author zm
+     * @date 2025-05-02
+     */
+    @ApiOperation(value = "下载图片", notes = "download_picture")
+    @PostMapping(value = "/download/image")
+    public TResponse<String> downloadImage(@Validated @RequestBody WxPpWcfDownloadAttachReq request) {
+        String path = weChatDllService.downloadImage(request);
+        return TResponse.ok(ResponseCodeEnum.SUCCESS, path);
+    }
+
+    /**
+     * 暂未实现 TODO
+     *
+     * @param request 请求入参
+     * @return
+     *
+     *
+     * @author zm
+     * @date 2025-05-01
+     */
+    @ApiOperation(value = "登陆二维码", notes = "loginQrCode")
+    @PostMapping(value = "/loginQrCode")
+    public TResponse<Object> loginQrCode(@Validated @RequestBody WxPpWcfDownloadAttachReq request) {
+        String path = weChatDllService.loginQrCode();
+        return TResponse.ok(ResponseCodeEnum.SUCCESS, path);
+    }
 
 }

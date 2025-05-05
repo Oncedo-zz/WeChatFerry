@@ -1,5 +1,6 @@
 package com.wechat.ferry.service.impl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,17 +12,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.wechat.ferry.aggregation.facade.ContactDo;
 import com.wechat.ferry.config.WeChatFerryProperties;
+import com.wechat.ferry.entity.TResponse;
 import com.wechat.ferry.entity.proto.Wcf;
 import com.wechat.ferry.entity.vo.request.WxPpWcfAddFriendGroupMemberReq;
 import com.wechat.ferry.entity.vo.request.WxPpWcfDatabaseSqlReq;
 import com.wechat.ferry.entity.vo.request.WxPpWcfDatabaseTableReq;
 import com.wechat.ferry.entity.vo.request.WxPpWcfDeleteGroupMemberReq;
+import com.wechat.ferry.entity.vo.request.WxPpWcfDownloadAttachReq;
 import com.wechat.ferry.entity.vo.request.WxPpWcfGroupMemberReq;
 import com.wechat.ferry.entity.vo.request.WxPpWcfInviteGroupMemberReq;
 import com.wechat.ferry.entity.vo.request.WxPpWcfPassFriendApplyReq;
@@ -56,6 +60,7 @@ import com.wechat.ferry.exception.BizException;
 import com.wechat.ferry.handle.WeChatSocketClient;
 import com.wechat.ferry.service.WeChatDllService;
 import com.wechat.ferry.utils.HttpClientUtil;
+import com.wechat.ferry.utils.PathUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -643,6 +648,110 @@ public class WeChatDllServiceImpl implements WeChatDllService {
         return this.receiveTransfer(request);
     }
 
+    @Override
+    public String downloadVideo(WxPpWcfDownloadAttachReq request) {
+        long startTime = System.currentTimeMillis();
+        // 公共校验
+        checkClientStatus();
+        log.info("[下载]-[下载视频]-入参打印：{}", request);
+        try {
+            // # 强制等待 1 秒让数据入库，避免那帮人总是嗷嗷叫超时
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            // 处理中断异常
+            e.printStackTrace();
+        }
+        // 第一步，下载
+        // FUNC_DOWNLOAD_ATTACH_VALUE
+        int state = wechatSocketClient.downloadAttach(Long.parseLong(request.getMsgId()), "", request.getThumbnailUrl());
+        if (state != 0) {
+            log.error("{}:下载视频出错", request.getMsgId());
+            throw new BizException("下载视频出错");
+        }
+        // 第二步，检测文件,指定下载的目录
+        String base = PathUtil.removeExtension(request.getThumbnailUrl());
+        String filePath = base + ".mp4";
+        String path = null;
+        for (int i = 0; i < 30; i++) {
+            if (new File(filePath).exists()) {
+                path = filePath;
+                log.info("视频下载完毕：{}", path);
+                break;
+            } else {
+                log.info("等待下载中：{}", i);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    // 处理中断异常
+                    e.printStackTrace();
+                }
+            }
+        }
+        long endTime = System.currentTimeMillis();
+        log.info("[下载]-[下载视频]-处理结束，耗时：{}ms", (endTime - startTime));
+        return path;
+    }
+
+    @Override
+    public String downloadImage(WxPpWcfDownloadAttachReq request) {
+        long startTime = System.currentTimeMillis();
+        // 公共校验
+        checkClientStatus();
+        log.info("[下载]-[下载图片]-入参打印：{}", request);
+        // 校验文件路径
+        checkFileResourcePath(request.getResourcePath());
+        try {
+            // # 强制等待 1 秒让数据入库，避免那帮人总是嗷嗷叫超时
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            // 处理中断异常
+            e.printStackTrace();
+        }
+        // FUNC_DOWNLOAD_ATTACH_VALUE
+        int state = wechatSocketClient.downloadAttach(Long.valueOf(request.getMsgId()), "", request.getExtra());
+        if (state != 0) {
+            log.error("{}:下载视频出错", request.getMsgId());
+            throw new BizException("下载视频出错");
+        }
+        // 第二步解密图片-下载图片
+        // FUNC_DECRYPT_IMAGE_VALUE
+        String filePath = wechatSocketClient.decryptImage(request.getResourcePath(), request.getExtra());
+        String path = null;
+        for (int i = 0; i < 15; i++) {
+            if (new File(filePath).exists()) {
+                log.info("图片下载完毕：{}", filePath);
+                path = filePath;
+                break;
+            } else {
+                log.info("等待下载中：{}", i);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    // 处理中断异常
+                    e.printStackTrace();
+                }
+            }
+        }
+        long endTime = System.currentTimeMillis();
+        log.info("[下载]-[下载图片]-处理结束，耗时：{}ms", (endTime - startTime));
+        return path;
+    }
+
+    @Override
+    public String loginQrCode() {
+        // 公共校验
+        checkClientStatus();
+        try {
+            // # 强制等待 1 秒让数据入库，避免那帮人总是嗷嗷叫超时
+            Thread.sleep(1000);
+            // 第一步
+            int state = wechatSocketClient.getQrcode();
+        } catch (Exception e) {
+            throw new BizException("获取二维码失败");
+        }
+        return "";
+    }
+
     /**
      * 消息回调
      *
@@ -760,6 +869,23 @@ public class WeChatDllServiceImpl implements WeChatDllService {
     private void checkClientStatus() {
         if (!wechatSocketClient.isLogin()) {
             throw new BizException("微信客户端未登录或状态异常，请人工关闭本服务之后，退出微信客户端在重启本服务！");
+        }
+    }
+
+    /**
+     * 校验文件路径
+     *
+     * @author wmz
+     * @date 2025-05-02
+     */
+    private void checkFileResourcePath(String fileDirectory) {
+        if (!StringUtils.hasText(fileDirectory)) {
+            log.error("需要指定图片的路径dir");
+            throw new BizException("需要指定图片的路径dir");
+        }
+        boolean res = PathUtil.createDir(fileDirectory);
+        if (!res) {
+            throw new BizException("图片路径创建失败：{}", fileDirectory);
         }
     }
 

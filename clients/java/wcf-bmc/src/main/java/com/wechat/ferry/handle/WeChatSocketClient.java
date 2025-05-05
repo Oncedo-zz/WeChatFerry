@@ -126,8 +126,12 @@ public class WeChatSocketClient {
 
     public Response sendCmd(Request req) {
         try {
-            // 设置发送 20 秒超时
-            cmdSocket.setSendTimeout(20000);
+            // 不知道之前设置20S有啥特殊情况？？？这里设置超时时间 5s --> 参考Python版本
+            // 防止无响应的时候线程一直阻塞--ReceiveTimeout
+            // modify by wmz 2025-05-03
+            cmdSocket.setSendTimeout(5000);
+            cmdSocket.setReceiveTimeout(5000);
+
             ByteBuffer bb = ByteBuffer.wrap(req.toByteArray());
             cmdSocket.send(bb);
             ByteBuffer ret = ByteBuffer.allocate(BUFFER_SIZE);
@@ -176,13 +180,14 @@ public class WeChatSocketClient {
      *
      * @return 是否登录结果
      */
-    public Response getQrcode() {
+    public int getQrcode() {
         Request req = Request.newBuilder().setFuncValue(Functions.FUNC_REFRESH_QRCODE_VALUE).build();
         Response rsp = sendCmd(req);
+        int ret = -1;
         if (rsp != null) {
-            return rsp;
+            ret = rsp.getStatus();
         }
-        return null;
+        return ret;
     }
 
     /**
@@ -597,7 +602,7 @@ public class WeChatSocketClient {
      * @param extra 消息中的 extra
      * @return 结果状态码 0 为成功，其他失败
      */
-    public int downloadAttach(Integer id, String thumb, String extra) {
+    public int downloadAttach(Long id, String thumb, String extra) {
         int ret = -1;
         Wcf.AttachMsg attachMsg = Wcf.AttachMsg.newBuilder().setId(id).setThumb(thumb).setExtra(extra).build();
         Request req = Request.newBuilder().setFuncValue(Functions.FUNC_DOWNLOAD_ATTACH_VALUE).setAtt(attachMsg).build();
