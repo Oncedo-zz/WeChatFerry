@@ -14,7 +14,7 @@ public class TestSelenium {
         System.setProperty("webdriver.chrome.driver", "C:\\Plugs\\chrome-win64\\chromedriver.exe");
 
         ChromeOptions options = new ChromeOptions();
-        options.setBinary("C:\\Plugs\\chrome-win64\\chrome-win64\\chrome.exe"); // 完整路径
+        options.setBinary("C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe"); // 完整路径
         options.addArguments("--no-sandbox");          // Linux必加
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--remote-allow-origins=*"); // Selenium 4需要此参数
