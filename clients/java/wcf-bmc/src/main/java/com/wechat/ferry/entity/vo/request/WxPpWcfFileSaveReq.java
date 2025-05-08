@@ -7,21 +7,21 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * 请求入参-下载附件信息
+ * 请求入参-文件保存
  *
  * @author wmz
  * @date 2025-05-02
  */
 @Data
-@ApiModel(value = "wxPpWcfDownloadAttachReq", description = "个微WCF下载附件请求入参")
-public class WxPpWcfDownloadAttachReq {
+@ApiModel(value = "wxPpWcfFileSaveReq", description = "个微WCF文件保存请求入参")
+public class WxPpWcfFileSaveReq {
 
     /**
      * 消息编号
      */
     @NotBlank(message = "消息编号不能为空")
     @ApiModelProperty(value = "消息编号")
-    private String msgId;
+    private Long msgId;
 
     /**
      * 消息中的extra
