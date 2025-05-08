@@ -66,7 +66,7 @@ public class ReceiveMsgFactory implements InitializingBean {
         ReceiveMsgStrategy handler = strategyContainerMap.get(strategyType);
         if (handler == null) {
             log.error("[策略Context]-[MessageNoticeSendFactory]-策略类型：{}-未找到合适的处理器！", strategyType);
-            throw new BizException("未找到合适的处理器！");
+            // throw new BizException("未找到合适的处理器！");
         }
         return handler;
     }

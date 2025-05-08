@@ -696,8 +696,8 @@ public class WeChatDllServiceImpl implements WeChatDllService {
         // 第二步解密图片-下载图片
         // FUNC_DECRYPT_IMAGE_VALUE
         String filePath = wechatSocketClient.decryptImage(request.getExtra(), request.getSavePath());
-        // 强制等待2秒
-        forceSleep(2000);
+        // 强制等待1秒
+        forceSleep(1000);
         String path = null;
         for (int i = 0; i < request.getTimeout(); i++) {
             if (new File(filePath).exists()) {

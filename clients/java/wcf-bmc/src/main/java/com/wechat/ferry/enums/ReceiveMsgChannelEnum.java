@@ -18,9 +18,34 @@ import lombok.Getter;
 public enum ReceiveMsgChannelEnum {
 
     /**
+     * 0-测试
+     */
+    TEST("0", "测试"),
+
+    /**
      * 1-签到
      */
     SIGN_IN("1", "签到"),
+
+    /**
+     * OCR
+     */
+    OCR("2", "OCR"),
+
+    /**
+     * 3-龙
+     */
+    LONG("3", "呼叫神龙"),
+
+    /**
+     * 4-农行转账
+     */
+    NHZZ("4", "农行转账"),
+
+    /**
+     * 5-视频下载
+     */
+    VIDEO("5", "视频下载"),
 
     /**
      * 未匹配上
